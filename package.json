@@ -1,0 +1,9 @@
+{
+  "name": "kira-board",
+  "version": "1.0.0",
+  "description": "Krem temalı kişisel yazılım projeleri ve Kanban iş takip uygulaması",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

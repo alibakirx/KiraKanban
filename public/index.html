@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kira — Yazılım Projeleri & İş Takip Panosu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Üst Menü / Header -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+          <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
+          <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title-row">
+          <h1 class="brand-title">Kira</h1>
+          <span class="save-badge" id="saveBadge">Kaydedildi</span>
+        </div>
+        <p class="brand-subtitle">Kişisel Yazılım Projeleri & Kanban Panosu</p>
+      </div>
+    </div>
+
+    <!-- Arama ve Hızlı Filtreler -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="İş adı, kod (KR-1), açıklama veya not ara..." autocomplete="off" />
+        <button class="clear-search hidden" id="clearSearchBtn" title="Aramayı temizle">&times;</button>
+      </div>
+
+      <select id="priorityFilter" class="filter-select" title="Önceliğe Göre Filtrele">
+        <option value="all">Tüm Öncelikler</option>
+        <option value="critical">🔥 Kritik</option>
+        <option value="high">⚡ Yüksek</option>
+        <option value="medium">📌 Orta</option>
+        <option value="low">🌱 Düşük</option>
+      </select>
+
+      <select id="typeFilter" class="filter-select" title="İş Türüne Göre Filtrele">
+        <option value="all">Tüm Türler</option>
+        <option value="feature">✨ Özellik</option>
+        <option value="bug">🐛 Hata (Bug)</option>
+        <option value="improvement">🔧 İyileştirme</option>
+        <option value="research">🧪 Araştırma</option>
+      </select>
+    </div>
+
+    <!-- Sağ Aksiyon Butonları -->
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="exportBackupBtn" title="Tüm verileri ve resimleri tek bir JSON dosyası olarak bilgisayara indir">
+        💾 Yedek İndir
+      </button>
+      <label class="btn btn-ghost btn-sm" for="importBackupInput" title="Daha önce indirdiğin JSON yedeğini geri yükle">
+        📂 Yedek Yükle
+      </label>
+      <input type="file" id="importBackupInput" accept=".json,application/json" class="hidden" />
+
+      <button class="btn btn-secondary" id="openArchiveBtn" title="Arşivlenen işleri görüntüle">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="21 8 21 21 3 21 3 8"></polyline>
+          <rect x="1" y="3" width="22" height="5"></rect>
+          <line x1="10" y1="12" x2="14" y2="12"></line>
+        </svg>
+        <span>Arşiv</span>
+        <span class="counter-pill" id="archiveCountBadge">0</span>
+      </button>
+
+      <button class="btn btn-primary" id="newTaskBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>İş Ekle</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Proje Filtre Çubuğu (Ortak Pano üzerinde renkli proje etiketleri) -->
+  <section class="projects-bar">
+    <div class="projects-bar-left">
+      <span class="projects-label">Projeler:</span>
+      <div class="project-pills" id="projectPills">
+        <!-- JS ile doldurulacak -->
+      </div>
+      <button class="btn-add-project" id="manageProjectsBtn" title="Yeni proje ekle veya mevcutları düzenle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Proje Yönetimi</span>
+      </button>
+    </div>
+
+    <div class="projects-bar-right">
+      <span class="paste-hint" title="Yeni iş eklerken veya iş detayındayken doğrudan Ctrl+V ile ekran görüntüsü yapıştırabilirsin">
+        💡 İpucu: Karta veya forma <strong>Ctrl+V</strong> ile doğrudan ekran görüntüsü yapıştırabilirsin
+      </span>
+    </div>
+  </section>
+
+  <!-- Kanban Panosu -->
+  <main class="board-container">
+    <div class="board" id="board">
+      <!-- 1. Sütun: Planlama -->
+      <div class="board-column" data-status="planning">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="status-dot status-planning"></span>
+            <h2>Planlama</h2>
+            <span class="column-count" id="count-planning">0</span>
+          </div>
+          <button class="column-quick-add" data-quick-add="planning" title="Planlama sütununa iş ekle">+</button>
+        </div>
+        <div class="column-body" id="col-planning" data-status="planning"></div>
+      </div>
+
+      <!-- 2. Sütun: Başlandı -->
+      <div class="board-column" data-status="in_progress">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="status-dot status-in_progress"></span>
+            <h2>Başlandı</h2>
+            <span class="column-count" id="count-in_progress">0</span>
+          </div>
+          <button class="column-quick-add" data-quick-add="in_progress" title="Başlandı sütununa iş ekle">+</button>
+        </div>
+        <div class="column-body" id="col-in_progress" data-status="in_progress"></div>
+      </div>
+
+      <!-- 3. Sütun: Test Aşamasında -->
+      <div class="board-column" data-status="testing">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="status-dot status-testing"></span>
+            <h2>Test Aşamasında</h2>
+            <span class="column-count" id="count-testing">0</span>
+          </div>
+          <button class="column-quick-add" data-quick-add="testing" title="Test Aşamasında sütununa iş ekle">+</button>
+        </div>
+        <div class="column-body" id="col-testing" data-status="testing"></div>
+      </div>
+
+      <!-- 4. Sütun: Tamamlandı -->
+      <div class="board-column" data-status="done">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="status-dot status-done"></span>
+            <h2>Tamamlandı</h2>
+            <span class="column-count" id="count-done">0</span>
+          </div>
+          <div class="column-header-actions">
+            <button class="btn-archive-all hidden" id="archiveAllDoneBtn" title="Tamamlanan tüm işleri tek tıkla arşive gönder">
+              Tümünü Arşivle
+            </button>
+            <button class="column-quick-add" data-quick-add="done" title="Tamamlandı sütununa iş ekle">+</button>
+          </div>
+        </div>
+        <div class="column-body" id="col-done" data-status="done"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL 1: Yeni İş Ekle / Düzenle -->
+  <div class="modal-backdrop hidden" id="taskFormModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="taskFormTitle">Yeni İş Ekle</h3>
+        <button class="icon-close" id="closeTaskFormBtn">&times;</button>
+      </div>
+      <form id="taskForm" class="modal-body">
+        <input type="hidden" id="formTaskId" />
+
+        <div class="form-group">
+          <label for="formTitle">İş Başlığı <span class="req">*</span></label>
+          <input type="text" id="formTitle" required placeholder="Örn: Kullanıcı giriş ekranı JWT entegrasyonu" />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="formProject">Proje Etiketi <span class="req">*</span></label>
+            <select id="formProject" required></select>
+          </div>
+          <div class="form-group">
+            <label for="formStatus">Aşama (Sütun)</label>
+            <select id="formStatus">
+              <option value="planning">Planlama</option>
+              <option value="in_progress">Başlandı</option>
+              <option value="testing">Test Aşamasında</option>
+              <option value="done">Tamamlandı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="formPriority">Öncelik Seviyesi</label>
+            <select id="formPriority">
+              <option value="low">🌱 Düşük</option>
+              <option value="medium" selected>📌 Orta</option>
+              <option value="high">⚡ Yüksek</option>
+              <option value="critical">🔥 Kritik</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="formType">İş Türü</label>
+            <select id="formType">
+              <option value="feature" selected>✨ Özellik (Feature)</option>
+              <option value="bug">🐛 Hata (Bug)</option>
+              <option value="improvement">🔧 İyileştirme (Refactor)</option>
+              <option value="research">🧪 Araştırma / Not</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="formDescription">Açıklama / Detaylar</label>
+          <textarea id="formDescription" rows="3" placeholder="İşle ilgili teknik detaylar, beklentiler veya bağlantılar..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Küçük Resim / Ekran Görüntüsü (İsteğe Bağlı)</label>
+          <div class="image-dropzone" id="formImageDropzone">
+            <input type="file" id="formImageInput" accept="image/*" class="hidden" />
+            <div id="formImageEmpty" class="dropzone-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>Resim seçmek için tıkla, sürükle veya <strong>Ctrl+V</strong> ile yapıştır</span>
+            </div>
+            <div id="formImagePreviewWrap" class="dropzone-preview hidden">
+              <img id="formImagePreview" src="" alt="Önizleme" />
+              <button type="button" class="remove-img-btn" id="removeFormImageBtn">Resmi Kaldır</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" id="initialNoteGroup">
+          <label for="formInitialNote">İlk Not (İsteğe Bağlı)</label>
+          <input type="text" id="formInitialNote" placeholder="İşe başlarken hızlı bir not bırakmak istersen buraya yazabilirsin..." />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="cancelTaskFormBtn">İptal</button>
+          <button type="submit" class="btn btn-primary" id="saveTaskSubmitBtn">İşi Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: İş Detayları, Notlar ve Alt Görevler (Karta Tıklanınca Açılır) -->
+  <div class="modal-backdrop hidden" id="taskDetailModal">
+    <div class="modal-card modal-detail-card">
+      <div class="detail-topbar">
+        <div class="detail-badges" id="detailBadges">
+          <!-- Proje etiketi, İş Kodu, Tür, Öncelik -->
+        </div>
+        <div class="detail-top-actions">
+          <button class="btn btn-ghost btn-sm" id="editTaskFromDetailBtn" title="İş bilgilerini düzenle">
+            ✏️ Düzenle
+          </button>
+          <button class="btn btn-ghost btn-sm" id="archiveFromDetailBtn" title="Arşive gönder veya arşivden çıkar">
+            📦 Arşive Ekle
+          </button>
+          <button class="btn btn-danger-ghost btn-sm" id="deleteTaskBtn" title="İşi kalıcı olarak sil">
+            🗑️ Sil
+          </button>
+          <button class="icon-close" id="closeDetailModalBtn">&times;</button>
+        </div>
+      </div>
+
+      <div class="detail-content-grid">
+        <!-- Sol Sütun: Başlık, Durum Değiştirici, Açıklama, Resim, Alt Görevler -->
+        <div class="detail-main">
+          <h2 class="detail-title" id="detailTitle"></h2>
+
+          <div class="detail-status-bar">
+            <span class="status-bar-label">Aşama:</span>
+            <div class="status-stepper" id="detailStatusStepper">
+              <button type="button" data-step="planning">Planlama</button>
+              <button type="button" data-step="in_progress">Başlandı</button>
+              <button type="button" data-step="testing">Test Aşamasında</button>
+              <button type="button" data-step="done">Tamamlandı</button>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4 class="detail-section-title">Açıklama</h4>
+            <div class="detail-description" id="detailDescription"></div>
+          </div>
+
+          <!-- Küçük Resim / Görsel Alanı -->
+          <div class="detail-section">
+            <div class="detail-section-header">
+              <h4 class="detail-section-title">İş Görseli</h4>
+              <label class="btn-link" for="detailImageInput">+ Resim Ekle / Değiştir (veya Ctrl+V)</label>
+              <input type="file" id="detailImageInput" accept="image/*" class="hidden" />
+            </div>
+            <div id="detailImageContainer" class="detail-image-container hidden">
+              <img id="detailImage" src="" alt="İş görseli" title="Tam boy görmek için tıkla" />
+              <button type="button" class="btn-remove-detail-img" id="removeDetailImageBtn">Görseli Kaldır</button>
+            </div>
+            <div id="detailImageEmpty" class="detail-empty-hint">
+              Henüz görsel eklenmemiş. Bu pencere açıkken <strong>Ctrl+V</strong> yaparak ekran görüntüsü yapıştırabilirsin.
+            </div>
+          </div>
+
+          <!-- Alt Görevler (Checklist) -->
+          <div class="detail-section">
+            <div class="detail-section-header">
+              <h4 class="detail-section-title">Alt Görevler (Checklist)</h4>
+              <span class="checklist-progress-text" id="checklistProgressText">0/0</span>
+            </div>
+            <div class="checklist-progress-bar">
+              <div class="checklist-progress-fill" id="checklistProgressFill"></div>
+            </div>
+            <div class="checklist-items" id="detailChecklist"></div>
+            <form id="addChecklistForm" class="checklist-add-form">
+              <input type="text" id="newChecklistInput" placeholder="Yeni alt görev ekle ve Enter'a bas..." autocomplete="off" />
+              <button type="submit" class="btn btn-secondary btn-sm">Ekle</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sağ Sütun: Notlar Bölümü -->
+        <div class="detail-sidebar">
+          <div class="notes-header">
+            <h4>📝 İş Notları & Gelişmeler</h4>
+            <span class="notes-count-badge" id="detailNotesCount">0</span>
+          </div>
+
+          <form id="addNoteForm" class="note-form">
+            <textarea id="newNoteInput" rows="3" placeholder="Bu iş hakkında yeni bir not, toplantı çıktısı, hata detayı veya hatırlatma yaz..." required></textarea>
+            <div class="note-form-footer">
+              <span class="note-shortcut-hint">Ctrl + Enter ile hızlı gönder</span>
+              <button type="submit" class="btn btn-primary btn-sm">Not Ekle</button>
+            </div>
+          </form>
+
+          <div class="notes-list" id="detailNotesList">
+            <!-- Notlar buraya dizilecek -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Arşiv Çekmecesi (Sağdan Açılan Drawer) -->
+  <div class="drawer-backdrop hidden" id="archiveDrawerBackdrop">
+    <aside class="archive-drawer">
+      <div class="drawer-header">
+        <div>
+          <h3>📦 Arşivlenmiş İşler</h3>
+          <p>Tamamlanıp rafa kaldırılan işler burada saklanır</p>
+        </div>
+        <button class="icon-close" id="closeArchiveDrawerBtn">&times;</button>
+      </div>
+
+      <div class="drawer-search">
+        <input type="text" id="archiveSearchInput" placeholder="Arşivdeki işlerde ara..." autocomplete="off" />
+      </div>
+
+      <div class="drawer-body" id="archiveList">
+        <!-- Arşivlenmiş kartlar -->
+      </div>
+    </aside>
+  </div>
+
+  <!-- MODAL 4: Proje Yönetimi (Renkli Proje Etiketleri Ekle / Sil) -->
+  <div class="modal-backdrop hidden" id="projectsModal">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3>Yazılım Projelerini Yönet</h3>
+        <button class="icon-close" id="closeProjectsModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="addProjectForm" class="project-add-form">
+          <input type="text" id="newProjectName" placeholder="Yeni proje adı (Örn: E-Ticaret API)" required />
+          <input type="color" id="newProjectColor" value="#B45309" title="Proje Etiket Rengi Seç" />
+          <button type="submit" class="btn btn-primary btn-sm">Ekle</button>
+        </form>
+
+        <div class="color-presets" id="colorPresets">
+          <span class="preset-label">Önerilen Renkler:</span>
+          <button type="button" class="color-swatch" data-color="#B45309" style="background:#B45309"></button>
+          <button type="button" class="color-swatch" data-color="#0F766E" style="background:#0F766E"></button>
+          <button type="button" class="color-swatch" data-color="#4338CA" style="background:#4338CA"></button>
+          <button type="button" class="color-swatch" data-color="#BE123C" style="background:#BE123C"></button>
+          <button type="button" class="color-swatch" data-color="#15803D" style="background:#15803D"></button>
+          <button type="button" class="color-swatch" data-color="#7E22CE" style="background:#7E22CE"></button>
+          <button type="button" class="color-swatch" data-color="#0369A1" style="background:#0369A1"></button>
+          <button type="button" class="color-swatch" data-color="#A16207" style="background:#A16207"></button>
+        </div>
+
+        <div class="projects-manage-list" id="projectsManageList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Görsel Büyütme (Lightbox) -->
+  <div class="lightbox-backdrop hidden" id="lightboxModal">
+    <img id="lightboxImage" src="" alt="Büyük Görsel" />
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
