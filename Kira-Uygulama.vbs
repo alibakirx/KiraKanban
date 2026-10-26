@@ -2,7 +2,7 @@ Set WshShell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 currentDir = fso.GetParentFolderName(WScript.ScriptFullName)
-htmlPath = currentDir & "\public\index.html"
+htmlPath = currentDir & "\docs\index.html"
 fileUrl = "file:///" & Replace(htmlPath, "\", "/")
 
 ' Chrome veya Edge uygulama modunda (adres çubuksuz masaüstü penceresi olarak) aç

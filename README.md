@@ -22,7 +22,7 @@ Tarayıcının kendi veritabanında (IndexedDB). Hiçbir yere gönderilmez, kims
 
 ## Çalıştırma
 
-En basit yol: `public/index.html` dosyasını tarayıcıda aç.
+En basit yol: `docs/index.html` dosyasını tarayıcıda aç.
 
 Windows'ta masaüstü uygulaması gibi açmak istersen `Kira-Uygulama.vbs` dosyasına çift tıkla. Edge veya Chrome'u adres çubuğu olmadan, kendi penceresinde açar.
 
@@ -37,7 +37,7 @@ Sonra `http://localhost:3456` adresine git. Ek paket kurmana gerek yok.
 ## Yapı
 
 ```
-public/
+docs/
   index.html   arayüz
   style.css    krem tema
   app.js       tüm uygulama mantığı
